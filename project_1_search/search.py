@@ -70,7 +70,7 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
     """
@@ -87,29 +87,59 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    #util.raiseNotDefined()
     startState = problem.getStartState()
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
     closedSet = set()
     fringe = util.Stack()
     fringe.push(startState)
+    predecessorDict = {}
     while not fringe.isEmpty():
         node = fringe.pop()
         if problem.isGoalState(node):
-            # TODO recursively return the solution
-            pass
+            actionList = getActionListFromPredecessorDict(predecessorDict, node, startState)
+            return actionList
         if node not in closedSet:
             closedSet.add(node)
-            for childNode in problem.getSuccessors(node):
-                # TODO get the data from the childnode
-                fringe.push(childNode)
+            # action = {"East", "West", "South", "North"}
+            for childNode, action, cost in problem.getSuccessors(node):
+                if childNode not in closedSet:
+                    fringe.push(childNode)
+                    predecessorDict[childNode] = (node, action, cost)
     print "*** Solution not found ! "
     util.sys.exit(1)
+
+def getActionListFromPredecessorDict(predecessorDict, node, startState):
+    actionList = []
+    while startState != node:
+        node, action, cost = predecessorDict[node]
+        actionList.insert(0, action)
+    return actionList
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+    closedSet = set()
+#    visitedSet = set()
+    fringe = util.Queue()
+    fringe.push(startState)
+    predecessorDict = {}
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node):
+            actionList = getActionListFromPredecessorDict(predecessorDict, node, startState)
+            return actionList
+        if node not in closedSet:
+            closedSet.add(node)
+#            visitedSet.add(node)
+            # action = {"East", "West", "South", "North"}
+            for childNode, action, cost in problem.getSuccessors(node):
+#                if childNode not in visitedSet:
+                if childNode not in closedSet:
+                    fringe.push(childNode)
+#                    visitedSet.add(childNode)
+                    predecessorDict[childNode] = (node, action, cost)
+    print "*** Solution not found ! "
+    util.sys.exit(1)
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
