@@ -352,13 +352,12 @@ class CornersProblem(search.SearchProblem):
     def getNewCornerLeft(self, cornerLeft, index):
         # get the current binary number (1 or 0) for given index
         index = int(index)
-        result = (cornerLeft >> index) & 1
-        if 0 == result:
-            return -1
-        else:
+        if isIndexInBinaryNumber(cornerLeft, index):
             cornerIndexBinary = (1 << index)
             newCornerLeft = cornerLeft - cornerIndexBinary
             return newCornerLeft
+        else:
+            return -1
 
     def getCostOfActions(self, actions):
         """
@@ -373,6 +372,8 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
+def isIndexInBinaryNumber(number, index):
+    return ((number >> index) & 1)
 
 def cornersHeuristic(state, problem):
     """
@@ -389,9 +390,30 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    position, cornersLeft = state
+    notVisitedCornersList = []
+    heuristicValue = 0
+    for index in range(0, len(corners)):
+        if isIndexInBinaryNumber(cornersLeft, index):
+            notVisitedCornersList.append(corners[index])
+    if 0 == len(notVisitedCornersList):
+        # All the corners are visited, this is the goal state
+        return heuristicValue
+    nearestCorner = position
+    while 1 < len(notVisitedCornersList):
+        nearestCornerDistance = 999999
+        oldPosition = nearestCorner
+        for corner in notVisitedCornersList:
+            newDistance = util.manhattanDistance(oldPosition, corner)
+            if newDistance < nearestCornerDistance:
+                nearestCorner = corner
+                nearestCornerDistance = newDistance
+        heuristicValue += nearestCornerDistance
+        notVisitedCornersList.remove(nearestCorner)
+    heuristicValue += util.manhattanDistance(nearestCorner, notVisitedCornersList[0])
+    return heuristicValue
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"

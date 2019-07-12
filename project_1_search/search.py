@@ -157,6 +157,8 @@ def uniformCostSearch(problem):
             return actionList
         if node not in closedSet:
             closedSet.add(node)
+            if node in predecessorDict:
+                (predecessorNode, predecessorAction, predecessorCost) = predecessorDict[node]
             # action = {"East", "West", "South", "North"}
             for childNode, action, cost in problem.getSuccessors(node):
                 if childNode not in closedSet:
@@ -196,6 +198,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         if node not in closedSet:
             closedSet.add(node)
             # action = {"East", "West", "South", "North"}
+            if node in predecessorDict:
+                (predecessorNode, predecessorAction, predecessorCost) = predecessorDict[node]
             for childNode, action, cost in problem.getSuccessors(node):
                 if childNode not in closedSet:
                     newCost = predecessorCost + cost
