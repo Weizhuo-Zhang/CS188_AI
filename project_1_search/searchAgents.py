@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.costFn = lambda x: 1
 
     def getStartState(self):
         """
@@ -295,14 +296,20 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        cornersLeft = int("1111", 2)
+        return (self.startingPosition, cornersLeft)
+
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        position, cornersLeft = state
+        if (position in self.corners) and 0 == cornersLeft:
+            return True
+        else:
+            return False
 
     def getSuccessors(self, state):
         """
@@ -325,9 +332,33 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-
+            position, cornersLeft = state
+            x,y = position
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            if not hitsWall:
+                nextState = (nextx, nexty)
+                if nextState in self.corners:
+                    index = self.corners.index(nextState)
+                    result = self.getNewCornerLeft(cornersLeft, index)
+                    if -1 != result:
+                        cornersLeft = result
+                cost = self.costFn(nextState)
+                successors.append( ( (nextState, cornersLeft), action, cost) )
         self._expanded += 1 # DO NOT CHANGE
         return successors
+
+    def getNewCornerLeft(self, cornerLeft, index):
+        # get the current binary number (1 or 0) for given index
+        index = int(index)
+        result = (cornerLeft >> index) & 1
+        if 0 == result:
+            return -1
+        else:
+            cornerIndexBinary = (1 << index)
+            newCornerLeft = cornerLeft - cornerIndexBinary
+            return newCornerLeft
 
     def getCostOfActions(self, actions):
         """
