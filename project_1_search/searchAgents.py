@@ -511,18 +511,41 @@ def foodHeuristic(state, problem):
     heuristicValue = 0
     if 0 == len(foodList):
         return heuristicValue
-    nearestFoodPosition = position
-    while 1 < len(foodList):
-        minDistance = 999999
-        oldPosition = nearestFoodPosition
-        for foodPosition in foodList:
-            tempDistance = util.manhattanDistance(oldPosition, foodPosition)
-            if tempDistance < minDistance:
-                minDistance = tempDistance
-                nearestFoodPosition = foodPosition
-        heuristicValue += minDistance
-        foodList.remove(nearestFoodPosition)
-    heuristicValue += util.manhattanDistance(nearestFoodPosition, foodList[0])
+    elif 1 == len(foodList):
+        heuristicValue += util.manhattanDistance(position, foodList[0])
+        return heuristicValue
+
+    heuristicValue = 999999
+    for firstPosition in foodList:
+        tempHeuristicValue = util.manhattanDistance(position, firstPosition)
+        nearestFoodPosition = firstPosition
+        newFoodList = list(foodList)
+        newFoodList.remove(firstPosition)
+        while 1 < len(newFoodList):
+            minDistance = 999999
+            oldPosition = nearestFoodPosition
+            for foodPosition in newFoodList:
+                tempDistance = util.manhattanDistance(oldPosition, foodPosition)
+                if tempDistance < minDistance:
+                    minDistance = tempDistance
+                    nearestFoodPosition = foodPosition
+            tempHeuristicValue += minDistance
+            newFoodList.remove(nearestFoodPosition)
+        tempHeuristicValue += util.manhattanDistance(nearestFoodPosition, newFoodList[0])
+        heuristicValue = min(heuristicValue, tempHeuristicValue)
+
+#    nearestFoodPosition = position
+#    while 1 < len(foodList):
+#        minDistance = 999999
+#        oldPosition = nearestFoodPosition
+#        for foodPosition in foodList:
+#            tempDistance = util.manhattanDistance(oldPosition, foodPosition)
+#            if tempDistance < minDistance:
+#                minDistance = tempDistance
+#                nearestFoodPosition = foodPosition
+#        heuristicValue += minDistance
+#        foodList.remove(nearestFoodPosition)
+#    heuristicValue += util.manhattanDistance(nearestFoodPosition, foodList[0])
     return heuristicValue
 
 class ClosestDotSearchAgent(SearchAgent):
