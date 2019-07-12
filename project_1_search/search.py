@@ -119,7 +119,7 @@ def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     startState = problem.getStartState()
     closedSet = set()
-#    visitedSet = set()
+    visitedSet = set()
     fringe = util.Queue()
     fringe.push(startState)
     predecessorDict = {}
@@ -130,13 +130,12 @@ def breadthFirstSearch(problem):
             return actionList
         if node not in closedSet:
             closedSet.add(node)
-#            visitedSet.add(node)
+            visitedSet.add(node)
             # action = {"East", "West", "South", "North"}
             for childNode, action, cost in problem.getSuccessors(node):
-#                if childNode not in visitedSet:
-                if childNode not in closedSet:
+                if childNode not in visitedSet:
                     fringe.push(childNode)
-#                    visitedSet.add(childNode)
+                    visitedSet.add(childNode)
                     predecessorDict[childNode] = (node, action, cost)
     print "*** Solution not found ! "
     util.sys.exit(1)
