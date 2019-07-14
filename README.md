@@ -3,7 +3,7 @@ This repository is for CS188 Intro to AI of UC Berkerly.
 
 ## Project
 - [x] Project 1: Search
-- [] Project 2: Multiagent
+- Project 2: Multiagent
 
 ## Contest
-- [] Mini Contest 1
+- Mini Contest 1
