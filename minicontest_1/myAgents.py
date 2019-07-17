@@ -71,7 +71,7 @@ class ClosestDotAgent(Agent):
 
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(problem)
 
     def getAction(self, state):
         return self.findPathToClosestDot(state)[0]
@@ -110,5 +110,6 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        foodList = self.food.asList()
+        return (state in foodList)
 

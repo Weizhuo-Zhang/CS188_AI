@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
+# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -87,17 +87,91 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+    closedSet = set()
+    fringe = util.Stack()
+    fringe.push(startState)
+    predecessorDict = {}
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node):
+            actionList = getActionListFromPredecessorDict(predecessorDict, node, startState)
+            return actionList
+        if node not in closedSet:
+            closedSet.add(node)
+            # action = {"East", "West", "South", "North"}
+            for childNode, action, cost in problem.getSuccessors(node):
+                if childNode not in closedSet:
+                    fringe.push(childNode)
+                    predecessorDict[childNode] = (node, action, cost)
+    print("*** Solution not found ! ")
+    util.sys.exit(1)
+
+def getActionListFromPredecessorDict(predecessorDict, node, startState):
+    actionList = []
+    while startState != node:
+        node, action, cost = predecessorDict[node]
+        actionList.insert(0, action)
+    return actionList
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+    closedSet = set()
+    visitedSet = set()
+    fringe = util.Queue()
+    fringe.push(startState)
+    predecessorDict = {}
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node):
+            actionList = getActionListFromPredecessorDict(predecessorDict, node, startState)
+            return actionList
+        if node not in closedSet:
+            closedSet.add(node)
+            visitedSet.add(node)
+            # action = {"East", "West", "South", "North"}
+            for childNode, action, cost in problem.getSuccessors(node):
+                if childNode not in visitedSet:
+                    fringe.push(childNode)
+                    visitedSet.add(childNode)
+                    predecessorDict[childNode] = (node, action, cost)
+    print("*** Solution not found ! ")
+    util.sys.exit(1)
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startState = problem.getStartState()
+    closedSet = set()
+    predecessorCost = 0
+    fringe = util.PriorityQueue()
+    fringe.push(startState, predecessorCost)
+    predecessorDict = {}
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node):
+            actionList = getActionListFromPredecessorDict(predecessorDict, node, startState)
+            return actionList
+        if node not in closedSet:
+            closedSet.add(node)
+            if node in predecessorDict:
+                (predecessorNode, predecessorAction, predecessorCost) = predecessorDict[node]
+            # action = {"East", "West", "South", "North"}
+            for childNode, action, cost in problem.getSuccessors(node):
+                if childNode not in closedSet:
+                    newCost = predecessorCost + cost
+                    if childNode not in predecessorDict:
+                        fringe.push(childNode, newCost)
+                        predecessorDict[childNode] = (node, action, newCost)
+                    else:
+                        (preNode, preAction, preCost) = predecessorDict[childNode]
+                        if newCost < preCost:
+                            fringe.update(childNode, newCost)
+                            predecessorDict[childNode] = (node, action, newCost)
+    print("*** Solution not found ! ")
+    util.sys.exit(1)
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,8 +183,35 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    startState = problem.getStartState()
+    closedSet = set()
+    predecessorCost = 0
+    fringe = util.PriorityQueue()
+    fringe.push(startState, predecessorCost + heuristic(startState, problem))
+    predecessorDict = {}
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        if problem.isGoalState(node):
+            actionList = getActionListFromPredecessorDict(predecessorDict, node, startState)
+            return actionList
+        if node not in closedSet:
+            closedSet.add(node)
+            # action = {"East", "West", "South", "North"}
+            if node in predecessorDict:
+                (predecessorNode, predecessorAction, predecessorCost) = predecessorDict[node]
+            for childNode, action, cost in problem.getSuccessors(node):
+                if childNode not in closedSet:
+                    newCost = predecessorCost + cost
+                    if childNode not in predecessorDict:
+                        fringe.push(childNode, newCost + heuristic(childNode, problem))
+                        predecessorDict[childNode] = (node, action, newCost)
+                    else:
+                        (preNode, preAction, preCost) = predecessorDict[childNode]
+                        if newCost < preCost:
+                            fringe.update(childNode, newCost + heuristic(childNode, problem))
+                            predecessorDict[childNode] = (node, action, newCost)
+    print("*** Solution not found ! ")
+    util.sys.exit(1)
 
 # Abbreviations
 bfs = breadthFirstSearch
