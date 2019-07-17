@@ -70,7 +70,7 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return [s, s, w, s, w, w, s, w]
+    return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
     """
@@ -82,9 +82,9 @@ def depthFirstSearch(problem):
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
 
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
     startState = problem.getStartState()
@@ -104,7 +104,7 @@ def depthFirstSearch(problem):
                 if childNode not in closedSet:
                     fringe.push(childNode)
                     predecessorDict[childNode] = (node, action, cost)
-    print "*** Solution not found ! "
+    print("*** Solution not found ! ")
     util.sys.exit(1)
 
 def getActionListFromPredecessorDict(predecessorDict, node, startState):
@@ -137,7 +137,7 @@ def breadthFirstSearch(problem):
                     fringe.push(childNode)
                     visitedSet.add(childNode)
                     predecessorDict[childNode] = (node, action, cost)
-    print "*** Solution not found ! "
+    print("*** Solution not found ! ")
     util.sys.exit(1)
 
 def uniformCostSearch(problem):
@@ -170,7 +170,7 @@ def uniformCostSearch(problem):
                         if newCost < preCost:
                             fringe.update(childNode, newCost)
                             predecessorDict[childNode] = (node, action, newCost)
-    print "*** Solution not found ! "
+    print("*** Solution not found ! ")
     util.sys.exit(1)
 
 def nullHeuristic(state, problem=None):
@@ -210,9 +210,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                         if newCost < preCost:
                             fringe.update(childNode, newCost + heuristic(childNode, problem))
                             predecessorDict[childNode] = (node, action, newCost)
-    print "*** Solution not found ! "
+    print("*** Solution not found ! ")
     util.sys.exit(1)
-
 
 # Abbreviations
 bfs = breadthFirstSearch
