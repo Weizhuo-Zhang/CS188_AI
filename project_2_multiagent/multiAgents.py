@@ -43,9 +43,13 @@ class ReflexAgent(Agent):
 
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
+        #print("scores: {0}".format(scores))
         bestScore = max(scores)
+        #print("bestScore: {0}".format(bestScore))
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        #print("bestIndices: {0}".format(bestIndices))
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        #print("chosenIndex: {0}".format(chosenIndex))
 
         "Add more of your code here if you want to"
 
@@ -74,7 +78,41 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        #return successorGameState.getScore()
+        # The distance to the nearest food
+        successorScore = successorGameState.getScore()
+        distanceToFood = float('inf')
+        for foodPos in newFood.asList():
+            distanceTemp = util.manhattanDistance(newPos, foodPos)
+            if distanceTemp < distanceToFood:
+                distanceToFood = distanceTemp
+        score = successorScore + (1/(1+len(newFood.asList())))**(1/distanceToFood)
+        if newPos == currentGameState.getPacmanPosition():
+            score -= 2
+        elif action == currentGameState.getPacmanState().configuration.getDirection():
+            score += 0.8
+        for index, scareTime in enumerate(newScaredTimes):
+            if 0 == scareTime:
+                break
+            ghostStateConf = newGhostStates[index].configuration
+            ghostStatePos = ghostStateConf.pos
+            distanceToGhost = util.manhattanDistance(newPos, ghostStatePos)
+            if distanceToGhost <= scareTime:
+                score += scareTime
+        return score
+
+        # The sum distance to all the food
+        # successorScore = successorGameState.getScore()
+        # distanceToNearestFood = float('inf')
+        # for foodPos in newFood:
+        #     distanceTemp = util.manhattanDistance(newPos, foodPos)
+        #     if distanceTemp < distanceToNearestFood:
+        #         distanceToNearestFood = distanceTemp
+        # score = successorScore + distanceToNearestFood
+        # if newPos == currentGameState.getPacmanPosition():
+        #     score -= 2
+        # return score
+
 
 def scoreEvaluationFunction(currentGameState):
     """
