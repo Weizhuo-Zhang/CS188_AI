@@ -81,8 +81,10 @@ class ReflexAgent(Agent):
         #return successorGameState.getScore()
         if successorGameState.isWin():
             return float('inf')
+        if successorGameState.isLose():
+            return -float('inf')
         successorScore = successorGameState.getScore()
-        score = successorScore
+        score =  successorScore
 
         # The distance to the nearest food
         distanceToFood = float('inf')
