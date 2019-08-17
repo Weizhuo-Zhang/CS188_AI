@@ -79,26 +79,66 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
         #return successorGameState.getScore()
-        # The distance to the nearest food
+        if successorGameState.isWin():
+            return float('inf')
         successorScore = successorGameState.getScore()
+        score = successorScore
+
+        # The distance to the nearest food
         distanceToFood = float('inf')
         for foodPos in newFood.asList():
             distanceTemp = util.manhattanDistance(newPos, foodPos)
             if distanceTemp < distanceToFood:
                 distanceToFood = distanceTemp
-        score = successorScore + (1/(1+len(newFood.asList())))**(1/distanceToFood)
+        score -= distanceToFood - 4
+
+        # penalty to stay in the same position
         if newPos == currentGameState.getPacmanPosition():
             score -= 2
-        elif action == currentGameState.getPacmanState().configuration.getDirection():
-            score += 0.8
+
+#        # if the current action direction is same as previous direction,
+#        # add 1 score
+#        if action == currentGameState.getPacmanState().configuration.getDirection():
+#            score += 1
+
+        scareTime = 0
+        # # Compute the average scared Time
+        # # if pacman has bullet, the avg scared time should be positive and
+        # # pacman should chase the scared ghost
+        # avgScareTime = 0
+        # for index, scareTime in enumerate(newScaredTimes):
+        #     # ghostStateConf = newGhostStates[index].configuration
+        #     # ghostStatePos = ghostStateConf.pos
+        #     avgScareTime += scareTime
+        # avgScareTime = len(newScaredTimes)
+        # scareTime = avgScareTime
+        # score += scareTime
+
+        # Compute the sum of scared Time
+        # if pacman has bullet, the avg scared time should be positive and
+        # pacman should chase the scared ghost
+        sumScareTime = 0
         for index, scareTime in enumerate(newScaredTimes):
-            if 0 == scareTime:
-                break
-            ghostStateConf = newGhostStates[index].configuration
-            ghostStatePos = ghostStateConf.pos
-            distanceToGhost = util.manhattanDistance(newPos, ghostStatePos)
-            if distanceToGhost <= scareTime:
-                score += scareTime
+            # ghostStateConf = newGhostStates[index].configuration
+            # ghostStatePos = ghostStateConf.pos
+            sumScareTime += scareTime
+        scareTime = sumScareTime
+        score += scareTime
+
+        # If pacman has no bullet, pacman should be away from the ghosts
+        # The distance to the nearest ghost
+        distanceToGhost = float('inf')
+        for ghost in newGhostStates:
+            ghostPos = ghost.getPosition()
+            distanceTemp = util.manhattanDistance(newPos, ghostPos)
+            if distanceTemp < distanceToGhost:
+                distanceToGhost = distanceTemp
+        if 0 == scareTime:
+            if distanceToGhost <= 3:
+                score += distanceToGhost + 3
+        else:
+            score -= distanceToGhost
+
         return score
 
         # The sum distance to all the food
