@@ -27,6 +27,14 @@ class ReflexAgent(Agent):
     it in any way you see fit, so long as you don't touch our method
     headers.
     """
+    # visited
+    #visited = set()
+
+    #def getVisited(self):
+    #    return ReflexAgent.visited
+
+    #def addVisited(self, pos):
+    #    ReflexAgent.visited.add(pos)
 
 
     def getAction(self, gameState):
@@ -43,6 +51,7 @@ class ReflexAgent(Agent):
 
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
+        #print("Legal Actions: {0}", legalMoves)
         #print("scores: {0}".format(scores))
         bestScore = max(scores)
         #print("bestScore: {0}".format(bestScore))
@@ -83,25 +92,20 @@ class ReflexAgent(Agent):
             return float('inf')
         if successorGameState.isLose():
             return -float('inf')
+        currentPos = currentGameState.getPacmanPosition()
+        # visited
+        # self.addVisited(currentPos)
         successorScore = successorGameState.getScore()
         score =  successorScore
 
-        # The distance to the nearest food
+        # The distance to the nearest food for succesorGameState
         distanceToFood = float('inf')
         for foodPos in newFood.asList():
             distanceTemp = util.manhattanDistance(newPos, foodPos)
             if distanceTemp < distanceToFood:
                 distanceToFood = distanceTemp
-        score -= distanceToFood - 4
-
-        # penalty to stay in the same position
-        if newPos == currentGameState.getPacmanPosition():
-            score -= 2
-
-#        # if the current action direction is same as previous direction,
-#        # add 1 score
-#        if action == currentGameState.getPacmanState().configuration.getDirection():
-#            score += 1
+        #score -= distanceToFood - 4
+        score += 1/(distanceToFood+1)
 
         scareTime = 0
         # # Compute the average scared Time
@@ -137,9 +141,22 @@ class ReflexAgent(Agent):
                 distanceToGhost = distanceTemp
         if 0 == scareTime:
             if distanceToGhost <= 3:
-                score += distanceToGhost + 3
+                distanceToGhost = distanceToGhost
+            # penalty to stay in the same position
+            else:
+                if newPos == currentPos:
+                    score -= 1
+                ## if the current action direction is same as previous direction,
+                ## add 1 score
+                #elif action == currentGameState.getPacmanState().configuration.getDirection():
+                #    score += 1
+
+                # visited
+                #if newPos in self.getVisited():
+                #    score -= 1
         else:
-            score -= distanceToGhost
+            distanceToGhost = 1/(distanceToGhost+1)
+        score += distanceToGhost
 
         return score
 
