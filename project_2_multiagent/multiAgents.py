@@ -280,7 +280,66 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action, score = \
+                self._maxNode(gameState, self.depth, -float('inf'), float('inf'))
+        return action
+
+    def _maxNode(self, gameState, depth, alpha, beta):
+        if gameState.isLose() or gameState.isWin():
+            return ("", self.evaluationFunction(gameState))
+        legalMoves = gameState.getLegalActions(0)
+        scores = []
+        tempValue = -float('inf')
+        for action in legalMoves:
+            successor = gameState.generateSuccessor(0, action)
+            score = self._minNode(successor, 1, depth, alpha, beta)
+            tempValue = max(tempValue, score)
+            if tempValue > beta:
+                return (action, tempValue)
+            alpha = max(alpha, tempValue)
+            scores.append(score)
+        bestScore = max(scores)
+        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        return (legalMoves[chosenIndex], bestScore)
+
+
+    def _minNode(self, gameState, ghostIndex, depth, alpha, beta):
+        if gameState.isLose() or gameState.isWin():
+            return self.evaluationFunction(gameState)
+        legalMoves = gameState.getLegalActions(ghostIndex)
+        scores = []
+        tempValue = float('inf')
+        if ghostIndex == (gameState.getNumAgents() - 1):
+            if 1 == depth:
+                for action in legalMoves:
+                    successor = gameState.generateSuccessor(ghostIndex, action)
+                    score = self.evaluationFunction(successor)
+                    tempValue = min(tempValue, score)
+                    if tempValue < alpha:
+                        return tempValue
+                    beta = min(beta, tempValue)
+                    scores.append(score)
+            else:
+                for action in legalMoves:
+                    successor = gameState.generateSuccessor(ghostIndex, action)
+                    action, score = self._maxNode(successor, depth-1, alpha, beta)
+                    tempValue = min(tempValue, score)
+                    if tempValue < alpha:
+                        return tempValue
+                    beta = min(beta, tempValue)
+                    scores.append(score)
+        else:
+            for action in legalMoves:
+                successor = gameState.generateSuccessor(ghostIndex, action)
+                score = self._minNode(successor, ghostIndex+1, depth, alpha, beta)
+                tempValue = min(tempValue, score)
+                if tempValue < alpha:
+                    return tempValue
+                beta = min(beta, tempValue)
+                scores.append(score)
+        bestScore = min(scores)
+        return bestScore
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
