@@ -232,87 +232,43 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        #util.raiseNotDefined()
-        #for i in range(self.depth):
-            #legalMoves = gameState.getLegalActions()
-            #scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
-            #bestScore = max(scores)
-            #bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-            #chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-
-            #successorGameState = currentGameState.generatePacmanSuccessor(action)
-            #newPos = successorGameState.getPacmanPosition()
-            #newFood = successorGameState.getFood()
-            #newGhostStates = successorGameState.getGhostStates()
-            #newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-
-        #successorGameState = currentGameState.generatePacmanSuccessor(action)
-
-        #legalMoves = gameState.getLegalActions()
-        #successorGameState = [gameState.generateSuccessor(0, action) for action in legalMoves]
-
-        #for successor in successorGameState:
-        #    self.getAction(successor)
-        #print("depth: {0}".format(self.depth))
-        #print("score: {0}".format(self.evaluationFunction(gameState)))
-        #exit(-1)
-
-        #for depth in range(self.depth):
-        #    legalMoves = gameState.getLegalActions()
-        #    successorGameState = [gameState.generateSuccessor(0, action) for action in legalMoves]
-        #    le
-        actions, score = self._maxNode(gameState, self.depth)
-        return actions
+        action, score = self._maxNode(gameState, self.depth)
+        return action
 
     def _maxNode(self, gameState, depth):
+        if gameState.isLose() or gameState.isWin():
+            return ("", self.evaluationFunction(gameState))
         legalMoves = gameState.getLegalActions(0)
         scores = []
-        actionsList = []
         for action in legalMoves:
-            actions, score = \
-                self._minNode(gameState.generateSuccessor(1, action), 1, depth)
+            successor = gameState.generateSuccessor(0, action)
+            score = self._minNode(successor, 1, depth)
             scores.append(score)
-            actionsList.append(actions)
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-        return (legalMoves[chosenIndex] + actionsList[chosenIndex], bestScore)
+        return (legalMoves[chosenIndex], bestScore)
+
 
     def _minNode(self, gameState, ghostIndex, depth):
-        if ghostIndex == gameState.getNumAgents():
-            legalMoves = gameState.getLegalActions(ghostIndex)
-            successorGhostStates = [gameState.generateSuccessor(ghostIndex, action) for action in legalMoves]
+        if gameState.isLose() or gameState.isWin():
+            return self.evaluationFunction(gameState)
+        legalMoves = gameState.getLegalActions(ghostIndex)
+        successorGhostStates = [gameState.generateSuccessor(ghostIndex, action) for action in legalMoves]
+        scores = []
+        if ghostIndex == (gameState.getNumAgents() - 1):
             if 1 == depth:
                 scores = [self.evaluationFunction(successor) for successor in successorGhostStates]
-                bestScore = min(scores)
-                return ([], bestScore)
             else:
-                scores = []
-                actionsList = []
                 for successor in successorGhostStates:
-                    actions, score = self._maxNode(successor, depth-1)
+                    action, score = self._maxNode(successor, depth-1)
                     scores.append(score)
-                    actionsList.append(actions)
-                bestScore = min(scores)
-                bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-                chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-                return (actionsList[chosenIndex], bestScore)
         else:
-            legalMoves = gameState.getLegalActions(ghostIndex)
-            scores = []
-            actionsList = []
-            for action in legalMoves:
-                actions, score = \
-                    self._minNode( \
-                        gameState.generateSuccessor(ghostIndex+1, action), \
-                        ghostIndex+1, \
-                        depth)
+            for successor in successorGhostStates:
+                score = self._minNode(successor, ghostIndex+1, depth)
                 scores.append(score)
-                actionsList.append(actions)
-            bestScore = min(scores)
-            bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-            chosenIndex = random.choice(bestIndices) # Pick randomly among the best
-            return (actionsList[chosenIndex], bestScore)
+        bestScore = min(scores)
+        return bestScore
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
