@@ -95,24 +95,24 @@ class ReflexAgent(Agent):
         scareTime = sumScareTime
         score += scareTime
 
-        # If pacman has no bullet, pacman should be away from the ghosts
-        # The distance to the nearest ghost
-        distanceToGhost = float('inf')
-        for ghost in newGhostStates:
-            ghostPos = ghost.getPosition()
-            distanceTemp = util.manhattanDistance(newPos, ghostPos)
-            if distanceTemp < distanceToGhost:
-                distanceToGhost = distanceTemp
-        if 0 == scareTime:
-            if distanceToGhost <= 3:
-                distanceToGhost = distanceToGhost
-            # penalty to stay in the same position
-            else:
-                if newPos == currentPos:
-                    score -= 1
-        else:
-            distanceToGhost = 1/(distanceToGhost+1)
-        score += distanceToGhost
+#        # If pacman has no bullet, pacman should be away from the ghosts
+#        # The distance to the nearest ghost
+#        distanceToGhost = float('inf')
+#        for ghost in newGhostStates:
+#            ghostPos = ghost.getPosition()
+#            distanceTemp = util.manhattanDistance(newPos, ghostPos)
+#            if distanceTemp < distanceToGhost:
+#                distanceToGhost = distanceTemp
+#        if 0 == scareTime:
+#            if distanceToGhost <= 3:
+#                distanceToGhost = distanceToGhost
+#            # penalty to stay in the same position
+#            else:
+#                if newPos == currentPos:
+#                    score -= 1
+#        else:
+#            distanceToGhost = 1/(distanceToGhost+1)
+#        score += distanceToGhost
 
         return score
 
