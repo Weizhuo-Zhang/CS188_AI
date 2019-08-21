@@ -297,7 +297,42 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action, score = self._maxNode(gameState, self.depth)
+        return action
+
+    def _maxNode(self, gameState, depth):
+        if gameState.isLose() or gameState.isWin():
+            return ("", self.evaluationFunction(gameState))
+        legalMoves = gameState.getLegalActions(0)
+        scores = []
+        for action in legalMoves:
+            successor = gameState.generateSuccessor(0, action)
+            score = self._expectChanceNode(successor, 1, depth)
+            scores.append(score)
+        bestScore = max(scores)
+        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        return (legalMoves[chosenIndex], bestScore)
+
+
+    def _expectChanceNode(self, gameState, ghostIndex, depth):
+        if gameState.isLose() or gameState.isWin():
+            return self.evaluationFunction(gameState)
+        legalMoves = gameState.getLegalActions(ghostIndex)
+        successorGhostStates = [gameState.generateSuccessor(ghostIndex, action) for action in legalMoves]
+        scores = []
+        if ghostIndex == (gameState.getNumAgents() - 1):
+            if 1 == depth:
+                scores = [self.evaluationFunction(successor) for successor in successorGhostStates]
+            else:
+                for successor in successorGhostStates:
+                    action, score = self._maxNode(successor, depth-1)
+                    scores.append(score)
+        else:
+            for successor in successorGhostStates:
+                score = self._expectChanceNode(successor, ghostIndex+1, depth)
+                scores.append(score)
+        return (sum(scores)/len(scores))
 
 def betterEvaluationFunction(currentGameState):
     """
