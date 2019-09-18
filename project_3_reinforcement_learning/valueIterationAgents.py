@@ -62,22 +62,15 @@ class ValueIterationAgent(ValueEstimationAgent):
     def runValueIteration(self):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
+        stateList = self.mdp.getStates()
         for iteration in range(self.iterations):
-            stateList = self.mdp.getStates()
             stateValueList = []
             # Store values
             for state in stateList:
                 if self.mdp.isTerminal(state):
                     stateValueList.append(None)
                     continue
-                validActionList = self.mdp.getPossibleActions(state)
-                valueList = []
-                for action in validActionList:
-                    q_value = self.computeQValueFromValues(state, action)
-                    valueList.append(q_value)
-                #return max(valueList)
-                stateValueList.append(max(valueList))
-                #stateValueList.append(self.computeActionFromValues(state))
+                stateValueList.append(self.getMaxValue(state)[0])
 
             # Update values
             for index, state in enumerate(stateList):
@@ -91,6 +84,15 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         return self.values[state]
 
+    def getMaxValue(self, state):
+        validActionList = self.mdp.getPossibleActions(state)
+        valueList = []
+        for action in validActionList:
+            q_value = self.computeQValueFromValues(state, action)
+            valueList.append(q_value)
+        max_value = max(valueList)
+        max_index = valueList.index(max_value)
+        return max_value, max_index
 
     def computeQValueFromValues(self, state, action):
         """
@@ -122,15 +124,8 @@ class ValueIterationAgent(ValueEstimationAgent):
         "*** YOUR CODE HERE ***"
         if self.mdp.isTerminal(state):
             return None
+        max_value, max_index = self.getMaxValue(state)
         validActionList = self.mdp.getPossibleActions(state)
-        #if [] == validActionList:
-        #    print("empty action list")
-        valueList = []
-        for action in validActionList:
-            q_value = self.computeQValueFromValues(state, action)
-            valueList.append(q_value)
-        max_value = max(valueList)
-        max_index = valueList.index(max_value)
         return validActionList[max_index]
 
     def getPolicy(self, state):
@@ -177,12 +172,7 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
             state = stateList[iteration%len(stateList)]
             if self.mdp.isTerminal(state):
                 continue
-            validActionList = self.mdp.getPossibleActions(state)
-            valueList = []
-            for action in validActionList:
-                q_value = self.computeQValueFromValues(state, action)
-                valueList.append(q_value)
-            self.values[state] = max(valueList)
+            self.values[state] = self.getMaxValue(state)[0]
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     """
@@ -201,6 +191,42 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
         self.theta = theta
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
 
+    def getPredecessorMap(self, stateList):
+        predecessorMap = {}
+        for state in stateList:
+            if self.mdp.isTerminal(state):
+                continue
+            for action in self.mdp.getPossibleActions(state):
+                for successor in  self.mdp.getTransitionStatesAndProbs(state, action):
+                    nextState = successor[0]
+                    if nextState not in predecessorMap.keys():
+                        predecessorMap[nextState] = set()
+                    predecessorMap[nextState].add(state)
+        return predecessorMap
+
+
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
+        stateList = self.mdp.getStates()
+        # compute predecessorMap
+        predecessorMap = self.getPredecessorMap(stateList)
+        priorityQueue = util.PriorityQueue()
+        # Get the initial diff for priorituQueue
+        for state in stateList:
+            if self.mdp.isTerminal(state):
+                continue
+            max_value, _ = self.getMaxValue(state)
+            diff = abs(max_value - self.values[state])
+            priorityQueue.push(state, -diff)
 
+        for iteration in range(self.iterations):
+            if priorityQueue.isEmpty():
+                return
+            state = priorityQueue.pop()
+            if not self.mdp.isTerminal(state):
+                self.values[state] = self.getMaxValue(state)[0]
+            for predecessor in predecessorMap[state]:
+                max_value, _ = self.getMaxValue(predecessor)
+                diff = abs(self.values[predecessor] - max_value)
+                if diff > self.theta:
+                    priorityQueue.update(predecessor, -diff)
